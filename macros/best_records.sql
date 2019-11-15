@@ -34,19 +34,23 @@ WITH
   ),
 
   ranked_records AS (
-    *,
-    ROW_NUMBER() OVER (
-      PARTITION BY {{ partition_by }}
-      ORDER BY _score DESC
-    ) AS _rank
+    SELECT 
+      *,
+      ROW_NUMBER() OVER (
+        PARTITION BY {{ partition_by }}
+        ORDER BY _score DESC
+      ) AS _rank
+    FROM scored_records
   )
 {% else %}
   ranked_records AS (
-    *,
-    ROW_NUMBER() OVER (
-      PARTITION BY {{ partition_by }}
-      {% if order_by %}ORDER BY {{ order_by }}{% endif %}
-    ) AS _rank
+    SELECT
+      *,
+      ROW_NUMBER() OVER (
+        PARTITION BY {{ partition_by }}
+        {% if order_by %}ORDER BY {{ order_by }}{% endif %}
+      ) AS _rank
+    FROM {{ source }}
   )
 {% endif %}
 
